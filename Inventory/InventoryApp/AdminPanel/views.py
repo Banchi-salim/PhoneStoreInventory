@@ -1,20 +1,19 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.http import JsonResponse
-from django.db.models import Sum, Count, F, Q
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Sum, F, Q
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from inventory.models import Product, Phone, Accessory, Inventory, Branch
-from sales.models import Sale, SaleItem, Customer
-from accounts.models import User
-from .forms import PhoneForm, AccessoryForm, InventoryForm
+
+from inventory.forms import PhoneForm
+from inventory.models import Product, Phone, Inventory, Brand, Category
 
 
 @login_required
 @permission_required('accounts.can_access_admin_portal', raise_exception=True)
 def dashboard(request):
     """Admin dashboard view with summary statistics"""
+    from Sales.models import Sale
     # Get current date
     today = timezone.now().date()
 
@@ -28,8 +27,8 @@ def dashboard(request):
     total_products = Product.objects.filter(is_active=True).count()
 
     # Get user's branch if assigned
-    if request.user.branch:
-        branch = request.user.branch
+    if request.CustomUser.branch:
+        branch = request.CustomUser.branch
         branch_sales = Sale.objects.filter(branch=branch, sale_date__date=today)
         branch_sales_count = branch_sales.count()
         branch_sales_amount = branch_sales.aggregate(total=Sum('total_amount'))['total'] or 0
