@@ -1,0 +1,55 @@
+{% extends "Adminpanel/base.html" %}
+{% block title %}Accessory List{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Accessories</h2>
+
+<form method="get" class="mb-6 flex flex-wrap gap-4">
+    <select name="brand" class="p-2 border rounded w-full sm:w-auto">
+        <option value="">All Brands</option>
+        {% for b in brands %}
+            <option value="{{ b.id }}" {% if b.id|stringformat:"s" == selected_brand %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="category" class="p-2 border rounded w-full sm:w-auto">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+            <option value="{{ c.id }}" {% if c.id|stringformat:"s" == selected_category %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="text" name="search" value="{{ search }}" placeholder="Search..." class="p-2 border rounded flex-1">
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Filter</button>
+</form>
+
+<table class="w-full table-auto border-collapse text-sm">
+    <thead>
+        <tr class="bg-blue-600 text-white">
+            <th class="p-2 border">Name</th>
+            <th class="p-2 border">Type</th>
+            <th class="p-2 border">SKU</th>
+            <th class="p-2 border">Price</th>
+            <th class="p-2 border">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for accessory in accessories %}
+        <tr class="border-b hover:bg-blue-50">
+            <td class="p-2">{{ accessory.name }}</td>
+            <td class="p-2 capitalize">{{ accessory.get_accessory_type_display }}</td>
+            <td class="p-2">{{ accessory.sku }}</td>
+            <td class="p-2">₦{{ accessory.selling_price }}</td>
+            <td class="p-2">
+                <a href="{% url 'admin_portal:accessory_edit' accessory.pk %}" class="text-blue-600 hover:underline">Edit</a> |
+                <a href="{% url 'admin_portal:accessory_delete' accessory.pk %}" class="text-red-600 hover:underline">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center p-4">No accessories found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

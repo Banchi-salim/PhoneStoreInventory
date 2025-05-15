@@ -1,0 +1,31 @@
+{% extends "AdminPanel/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-semibold mb-6">Dashboard Overview</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="bg-blue-100 p-4 rounded shadow">
+        <h3 class="text-lg font-medium">Today's Sales</h3>
+        <p class="text-2xl font-bold">₦{{ today_sales_amount }}</p>
+        <p class="text-sm">{{ today_sales_count }} Transactions</p>
+    </div>
+
+    <div class="bg-blue-100 p-4 rounded shadow">
+        <h3 class="text-lg font-medium">Low Stock Items</h3>
+        <p class="text-2xl font-bold">{{ low_stock_items }}</p>
+    </div>
+
+    <div class="bg-blue-100 p-4 rounded shadow">
+        <h3 class="text-lg font-medium">Active Products</h3>
+        <p class="text-2xl font-bold">{{ total_products }}</p>
+    </div>
+
+    {% if branch %}
+    <div class="bg-blue-200 p-4 rounded shadow col-span-full">
+        <h3 class="text-lg font-medium">Branch: {{ branch.name }}</h3>
+        <p class="text-sm">Sales: ₦{{ branch_sales_amount }} | Transactions: {{ branch_sales_count }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

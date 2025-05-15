@@ -8,6 +8,8 @@ from django.utils import timezone
 from inventory.forms import PhoneForm
 from inventory.models import Product, Phone, Inventory, Brand, Category
 
+from Inventory.InventoryApp.inventory.models import Accessory
+
 
 @login_required
 @permission_required('accounts.can_access_admin_portal', raise_exception=True)
@@ -47,7 +49,7 @@ def dashboard(request):
         'branch_sales_amount': branch_sales_amount,
     }
 
-    return render(request, 'admin_portal/dashboard.html', context)
+    return render(request, 'AdminPanel/dashboard.html', context)
 
 
 @login_required
@@ -88,7 +90,7 @@ def phone_list(request):
         'search': search,
     }
 
-    return render(request, 'admin_portal/phones/list.html', context)
+    return render(request, 'AdminPanel/phones.html', context)
 
 
 @login_required
@@ -100,7 +102,7 @@ def phone_add(request):
         if form.is_valid():
             phone = form.save()
             messages.success(request, f'Phone "{phone.name}" has been added successfully.')
-            return redirect('admin_portal:phone_list')
+            return redirect('AdminPanel:phone_list')
     else:
         form = PhoneForm()
 
@@ -109,7 +111,7 @@ def phone_add(request):
         'title': 'Add New Phone',
     }
 
-    return render(request, 'admin_portal/phones/form.html', context)
+    return render(request, 'AdminPanel/phones_form.html', context)
 
 
 @login_required
@@ -123,7 +125,7 @@ def phone_edit(request, pk):
         if form.is_valid():
             phone = form.save()
             messages.success(request, f'Phone "{phone.name}" has been updated successfully.')
-            return redirect('admin_portal:phone_list')
+            return redirect('AdminPanel:phone_list')
     else:
         form = PhoneForm(instance=phone)
 
@@ -133,7 +135,7 @@ def phone_edit(request, pk):
         'phone': phone,
     }
 
-    return render(request, 'admin_portal/phones/form.html', context)
+    return render(request, 'AdminPanel/phones_form.html', context)
 
 
 @login_required
@@ -146,10 +148,109 @@ def phone_delete(request, pk):
         phone_name = phone.name
         phone.delete()
         messages.success(request, f'Phone "{phone_name}" has been deleted successfully.')
-        return redirect('admin_portal:phone_list')
+        return redirect('AdminPanel:phone_list')
 
     context = {
         'phone': phone,
     }
 
-    return render(request, 'admin_portal/phones/delete.html', context)
+    return render(request, 'AdminPanel/phones_delete.html', context)
+
+
+@login_required
+@permission_required('inventory.view_accessory', raise_exception=True)
+def accessory_list(request):
+    brand = request.GET.get('brand')
+    category = request.GET.get('category')
+    search = request.GET.get('search')
+
+    accessories = Accessory.objects.all()
+
+    if brand:
+        accessories = accessories.filter(brand__id=brand)
+    if category:
+        accessories = accessories.filter(category__id=category)
+    if search:
+        accessories = accessories.filter(
+            Q(name__icontains=search) |
+            Q(sku__icontains=search) |
+            Q(barcode__icontains=search)
+        )
+
+    brands = Brand.objects.all()
+    categories = Category.objects.filter(parent__isnull=True) | Category.objects.filter(parent__name__icontains='accessory')
+
+    context = {
+        'accessories': accessories,
+        'brands': brands,
+        'categories': categories,
+        'selected_brand': brand,
+        'selected_category': category,
+        'search': search,
+    }
+
+    return render(request, 'AdminPanel/Accessories.html', context)
+
+
+@login_required
+@permission_required('inventory.add_accessory', raise_exception=True)
+def accessory_add(request):
+    from inventory.forms import AccessoryForm
+
+    if request.method == 'POST':
+        form = AccessoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            accessory = form.save()
+            messages.success(request, f'Accessory "{accessory.name}" has been added successfully.')
+            return redirect('admin_portal:accessory_list')
+    else:
+        form = AccessoryForm()
+
+    context = {
+        'form': form,
+        'title': 'Add New Accessory',
+    }
+
+    return render(request, 'admin_portal/accessories/form.html', context)
+
+
+@login_required
+@permission_required('inventory.change_accessory', raise_exception=True)
+def accessory_edit(request, pk):
+    from inventory.forms import AccessoryForm
+    accessory = get_object_or_404(Accessory, pk=pk)
+
+    if request.method == 'POST':
+        form = AccessoryForm(request.POST, request.FILES, instance=accessory)
+        if form.is_valid():
+            accessory = form.save()
+            messages.success(request, f'Accessory "{accessory.name}" has been updated successfully.')
+            return redirect('admin_portal:accessory_list')
+    else:
+        form = AccessoryForm(instance=accessory)
+
+    context = {
+        'form': form,
+        'title': f'Edit Accessory: {accessory.name}',
+        'accessory': accessory,
+    }
+
+    return render(request, 'admin_portal/accessories/form.html', context)
+
+
+@login_required
+@permission_required('inventory.delete_accessory', raise_exception=True)
+def accessory_delete(request, pk):
+    accessory = get_object_or_404(Accessory, pk=pk)
+
+    if request.method == 'POST':
+        accessory_name = accessory.name
+        accessory.delete()
+        messages.success(request, f'Accessory "{accessory_name}" has been deleted successfully.')
+        return redirect('admin_portal:accessory_list')
+
+    context = {
+        'accessory': accessory,
+    }
+
+    return render(request, 'admin_portal/accessories/delete.html', context)
