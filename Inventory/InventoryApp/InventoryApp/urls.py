@@ -26,12 +26,12 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(pattern_name='login_redirect')),
-    path('login-redirect/', views.login_redirect, name='login_redirect'),
-    path('accounts/', include('accounts.urls', namespace='accounts')),
-    path('admin-portal/', include('admin_portal.urls', namespace='admin_portal')),
-    path('staff-portal/', include('staff_portal.urls', namespace='staff_portal')),
+    #path('login-redirect/', views.login_redirect, name='login_redirect'),
+    path('accounts/', include('CustomUser.urls', namespace='accounts')),
+    path('admin-portal/', include('AdminPanel.urls', namespace='admin_portal')),
+    path('staff-portal/', include('Staff.urls', namespace='staff_portal')),
     path('inventory/', include('inventory.urls', namespace='inventory')),
-    path('sales/', include('sales.urls', namespace='sales')),
+    path('sales/', include('Sales.urls', namespace='sales')),
     path('reports/', include('reports.urls', namespace='reports')),
     path('api/', include('api.urls', namespace='api')),
 ]

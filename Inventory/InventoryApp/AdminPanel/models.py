@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 import uuid
 
-from Inventory.InventoryApp.inventory.models import Inventory, Purchase
+from inventory.models import Inventory, Purchase
 
 
 # notifications/models.py
